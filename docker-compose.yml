@@ -1,0 +1,9 @@
+services:
+  main:
+    image: node:latest
+    container_name: minicrossword
+    working_dir: /usr/src/app
+    restart: always
+    volumes:
+      - ./:/usr/src/app
+    command: sh -c "npm install && npm start"
