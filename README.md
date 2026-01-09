@@ -47,21 +47,21 @@ Un bot Discord qui génère quotidiennement une grille de mots croisés "Mini" (
 
 ### Préparation du Dictionnaire
 
-Le bot a besoin d'un dictionnaire pour générer les grilles.
-1.  Lancez le script de population (récupère des mots depuis le Wiktionnaire) :
+Le bot utilise un dictionnaire local pour générer les grilles. La méthode recommandée utilise un export du Wiktionnaire (`fr-extract.jsonl` ~6Go) pour générer un dictionnaire riche et propre très rapidement.
+
+Vous pouvez trouver les exports ici par exemple : https://kaikki.org/dictionary/rawdata.html
+
+1.  Assurez-vous d'avoir le fichier `fr-extract.jsonl` à la racine du projet.
+2.  Lancez le script d'importation :
     ```bash
     node populate_dict.js
     ```
-    *Laissez tourner quelques minutes pour avoir une bonne base de mots.*
-2.  Observez la répartition des données :
+    *Le script va lire le dictionnaire, filtrer les mots (langue, longueur 2-6, validité) et nettoyer les définitions pour générer `src/data/dictionary.json`.*
+3.  Observez la répartition des données :
     ```bash
     node analyze_dict.js
     ```
-3. (Optionnel) Ajoutez des mots courts rapidement avec le script prévu à cet effet :
-    ```bash
-    node inject_short.js
-    ```
-4. Testez la génération d'une grille pour vérifier que tout fonctionne :
+4.  Testez la génération d'une grille pour vérifier que tout fonctionne :
     ```bash
     node test_gen.js
     ```

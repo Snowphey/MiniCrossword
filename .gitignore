@@ -1,4 +1,5 @@
 node_modules/
+fr-extract.jsonl
 src/config.json
 src/data/dailyState.json
 src/data/dictionary.json

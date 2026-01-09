@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const { updateDictionary } = require('./dictionaryManager');
 
 const dictionaryPath = path.join(__dirname, '../data/dictionary.json');
 
