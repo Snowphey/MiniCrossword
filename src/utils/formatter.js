@@ -38,4 +38,18 @@ function formatGrid(grid, definitions) {
     return gridString;
 }
 
-module.exports = { formatGrid };
+function formatClues(definitions, solvedDefs = new Set()) {
+    const formatLine = (d, type) => {
+        const key = `${type}-${d.number}`;
+        const isSolved = solvedDefs.has(key);
+        const text = `**${d.number}.** ${d.clue} (${d.length})`;
+        return isSolved ? `~~${text}~~` : text;
+    };
+
+    const across = definitions.across.map(d => formatLine(d, 'across')).join('\n');
+    const down = definitions.down.map(d => formatLine(d, 'down')).join('\n');
+
+    return { across, down };
+}
+
+module.exports = { formatGrid, formatClues };

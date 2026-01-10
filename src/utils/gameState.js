@@ -109,7 +109,9 @@ async function checkGuess(userId, direction, number, guessWord) {
      
      if (!target) return { valid: false, reason: "Définition introuvable (Vérifiez le numéro et la direction)" };
      
-     if (guessWord.toUpperCase() === target.answer.toUpperCase()) {
+     const normalize = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+
+     if (normalize(guessWord) === normalize(target.answer)) {
          const progress = getUserProgress(userId);
          const key = `${dirKey}-${number}`;
          

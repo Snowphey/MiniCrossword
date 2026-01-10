@@ -1,6 +1,6 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { checkGuess, markSolved, hasAlreadyWon, getUserProgress, getUserGrid, getDailyPuzzle } = require('../../utils/gameState');
-const { formatGrid } = require('../../utils/formatter');
+const { formatGrid, formatClues } = require('../../utils/formatter');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -102,8 +102,14 @@ module.exports = {
                 const userGrid = getUserGrid(userId);
                 const gridStr = formatGrid(userGrid, puzzle.definitions);
 
+                const embed = new EmbedBuilder()
+                    .setTitle('🎉 FÉLICITATIONS !')
+                    .setDescription(`Vous avez terminé le Mini Crossword !\nTemps: ${timeStr}`)
+                    .addFields({ name: 'Grille', value: gridStr })
+                    .setColor(0x00FF00);
+
                 // Reply to user ephemerally
-                await interaction.editReply(`🎉 **FÉLICITATIONS !**\nVous avez terminé le Mini Crossword !\nTemps: ${timeStr}\n${gridStr}`);
+                await interaction.editReply({ content: '', embeds: [embed] });
                 
                 // Public announcement
                 await interaction.channel.send(`🏆 <@${userId}> a terminé le Mini Crossword du jour en ${timeStr} !`);
@@ -111,17 +117,31 @@ module.exports = {
                 const puzzle = await getDailyPuzzle();
                 const userGrid = getUserGrid(userId);
                 const gridStr = formatGrid(userGrid, puzzle.definitions);
-
+                
+                const progress = getUserProgress(userId);
+                const { across, down } = formatClues(puzzle.definitions, progress.solvedDefs);
+                
+                let feedbackMsg = '';
                 if (result.isNew) {
-                    let msg = `✅ **Correct !** (${direction} ${number}: ${word.toUpperCase()})`;
+                    feedbackMsg = `✅ **Correct !** (${direction} ${number}: ${word.toUpperCase()})`;
                     if (result.extraRevealed && result.extraRevealed.length > 0) {
                         const extras = result.extraRevealed.map(e => `${e.direction} ${e.number} (${e.word})`).join(', ');
-                        msg += `\n👀 **Bonus trouvé(s) !** ${extras}`;
+                        feedbackMsg += `\n👀 **Bonus trouvé(s) !** ${extras}`;
                     }
-                    await interaction.editReply(`${msg}\n${gridStr}`);
                 } else {
-                    await interaction.editReply(`Mhmm, vous aviez déjà trouvé ce mot. Continuez !\n${gridStr}`);
+                    feedbackMsg = `Mhmm, vous aviez déjà trouvé ce mot. Continuez !`;
                 }
+
+                const embed = new EmbedBuilder()
+                    .setDescription(feedbackMsg)
+                    .addFields(
+                        { name: 'Grille', value: gridStr },
+                        { name: 'Horizontal', value: across || 'Aucun', inline: true },
+                        { name: 'Vertical', value: down || 'Aucun', inline: true }
+                    )
+                    .setColor(result.isNew ? 0x00AE86 : 0xFFA500);
+
+                await interaction.editReply({ content: '', embeds: [embed] });
             }
         } else {
             await interaction.editReply(`❌ **Incorrect.** ${result.reason || ''} Essaie encore !`);

@@ -1,6 +1,6 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { getDailyPuzzle, getUserGrid } = require('../../utils/gameState');
-const { formatGrid } = require('../../utils/formatter');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { getDailyPuzzle, getUserGrid, getUserProgress } = require('../../utils/gameState');
+const { formatGrid, formatClues } = require('../../utils/formatter');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -15,9 +15,23 @@ module.exports = {
             return;
         }
 
-        const userGrid = getUserGrid(interaction.user.id);
-        const gridStr = formatGrid(userGrid, puzzle.definitions);
+        const userId = interaction.user.id;
+        const userGrid = getUserGrid(userId);
+        const progress = getUserProgress(userId);
 
-		await interaction.editReply({ content: `Voici votre progression :\n${gridStr}` });
+        const gridStr = formatGrid(userGrid, puzzle.definitions);
+        const { across, down } = formatClues(puzzle.definitions, progress.solvedDefs);
+
+        const embed = new EmbedBuilder()
+            .setTitle('Votre progression')
+            .setDescription('Voici où en est votre grille.')
+            .addFields(
+                { name: 'Grille', value: gridStr },
+                { name: 'Horizontal', value: across || 'Aucun', inline: true },
+                { name: 'Vertical', value: down || 'Aucun', inline: true }
+            )
+            .setColor(0x3498db);
+
+		await interaction.editReply({ content: '', embeds: [embed] });
 	},
 };
